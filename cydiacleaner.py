@@ -4,6 +4,7 @@
 
 # Modules we need
 import os
+import shutil
 import socket
 import sys
 import urllib2
@@ -11,13 +12,13 @@ import urllib2
 # Varibles we need
 #repoFolder = '/etc/apt/sources.list.d/'
 repoFolder = 'repos/' # For testing reasons
+retiredFolder = repoFolder + 'retired/'
 mirrorFiles = [ 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2', 'Packages.gz', 'Packages' ]
 exclusion='cydia.list'
 
 def isValidHTTP(url=''):
 	"""
-	Function to validate if a given URL is valid. Used to 
-	find 2xx status codes over HTTP. Returns True/False
+	Function to validate a given URL using the P. Returns True/False
 	"""
 	try:
 		urllib2.urlopen(url)
@@ -151,6 +152,12 @@ def checkRepos(ourList=[]):
 
 if __name__ == '__main__':
 
+	# If this is our first time, create our retired folder
+	if not os.path.isdir(retiredFolder):
+		echo("No retired folder present, creating...")
+		os.mkdir(retiredFolder)
+		echo("done.\n")
+
 	# Time to build our list of repos with the info we need
 	repoFiles = findRepoFiles(repoFolder, exclusion)
 	repoList = findRepos(repoFolder, repoFiles)
@@ -191,5 +198,15 @@ if __name__ == '__main__':
 			echo('\nFull Repo:\t' + repo)
 			echo('\nFilename:\t' + filename)
 			echo('\nRepo Error:\t' + error + '\n')
-		# Add yes/no to migrate to /retired/
+
+		# Retire our bad repos
+		echo('\n')
+		for item in failedRepos:
+			filename = item[0]
+			liveFile = repoFolder + filename
+			retiredFile = retiredFolder + filename
+			echo('Retiring ' + filename + '...')
+			shutil.move(liveFile, retiredFile)
+			echo('done.\n')
+		echo('All invalid repositories have been retired.\n')
 		sys.exit(0)
