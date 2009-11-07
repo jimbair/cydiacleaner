@@ -24,8 +24,8 @@ def isValidHTTP(url=''):
 		urllib2.urlopen(url)
 	except:
 		return False
-	else:
-		return True
+
+	return True
 
 def isValidHostname(host=''):
 	"""
@@ -36,8 +36,8 @@ def isValidHostname(host=''):
 		socket.gethostbyname(host)
 	except:
 		return False
-	else:
-		return True
+
+	return True
 
 def echo(message=''):
 	"""
