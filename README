@@ -7,7 +7,7 @@ I will remove this warning when development is complete.
 
 This little Python program is being written to help clean up the Cydia repos on a jailbroken iPhone. This program ignores the "Entered by User" repos, but checks the "Installed By Package" repos.
 
-I decided to write this due to the "All Sources" package routinely giving me bunk repos that I would have to remove using either SSH or MobileTerminal since Cydia does not allow removal of repos that are installed by packages within Cydia for whatever reason, and removing the "All Sources" app even states that removing the app does not remove the sources it installs.
+I decided to write this due to the "All Sources" package routinely giving me bunk repos that I would have to remove using either SSH or MobileTerminal. Cydia does not allow removal of repos that are installed by packages for whatever reason, and removing the "All Sources" app even states that removing the app does not remove the sources it installs.
 
 Currently, this is a script you would upload and run directly on your phone (any directory is fine, so long as you're root). I'm still working out the exact logic, but I'm thinking when it's run by itself, it checks your repos, then if any bad repos are found, it asks if you want to remove them. I am debating support for 'retiring' a repo, which you can then check on later using a different flat (search for good repos out of a /retired/ folder), with an ability to simply flush out the retired entries.
 
