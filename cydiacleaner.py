@@ -46,35 +46,39 @@ def echo(message=''):
 	sys.stdout.write(message)
 	sys.stdout.flush()
 
-
-if __name__ == '__main__':
+def findRepoFiles(folder='', exclusion=None):
+	"""
+	Function to search a folder for repo files. If given an exclusion, 
+	will remove it from the list (exclusion should be a string).
+	"""
+	
 	# Find our files.
-	if os.path.isdir(repoFolder):
-		repoFiles = os.listdir(repoFolder)
+	if os.path.isdir(folder):
+		results = os.listdir(folder)
 	# Make sure our folder is actually there.
 	else:
-		sys.stderr.write('Our repo folder ' + repoFolder + ' is missing.\n')
+		sys.stderr.write('Our repo folder ' + folder + ' is missing.\n')
 		sys.exit(1)
 
 	# Remove cydia.list (it should be here)
-	if repoFiles.count(exclusion) > 0:
-		repoFiles.remove(exclusion)
-	# If our exclusion is missing, this isn't an iPhone w/ cydia. Exit.
-	else:
-		 sys.stderr.write(exclusion + ' is missing from ' + repoFolder)
-		 sys.stderr.write(' This repo is not valid or something has changed.\n')
-		 sys.exit(1)
+	if exclusion is not None:
+		if results.count(exclusion) > 0:
+			results.remove(exclusion)
 
 	# We only want *.list
-	for file in repoFiles:
+	for file in results:
 		ourExt = os.path.splitext(file)[-1]
 		if ourExt != '.list':
-			repoFiles.remove(file)
+			results.remove(file)
 
-	# Time to build our list of repos with the info we need
-	# filename, repo, dist
-	repoList = []
-	for file in repoFiles:
+	return results
+
+def findRepos(folder='', files=[]):
+	"""
+	Function to pull the apt repos out of a list of files from a given folder.
+	"""
+	results = []
+	for file in files:
 		# Open the file and save it to a list
 		data = open(repoFolder + file, 'r')
 		result = data.readlines()
@@ -86,10 +90,17 @@ if __name__ == '__main__':
 			if len(ourValues) > 0:
 				# Validate the line and get our info
 				if ourValues[0] == 'deb':
-					repoList.append([ file, ourValues[1], ourValues[2] ])
+					results.append([ file, ourValues[1], ourValues[2] ])
+	return results
 
-	# Now that we have our repo list. Time to start testing things!
-	for item in repoList:
+def checkRepos(ourList=[]):
+	"""
+	Function to verify if a list of repos are valid.
+	Expects a lists of lists, with each child list having:
+	[ Filename, Repo, Dist ]
+	"""
+	result = []
+	for item in ourList:
 		# Aliases are good.
 		filename = item[0]
 		repo = item[1]
@@ -124,8 +135,61 @@ if __name__ == '__main__':
 						validRepo = True
 						break
 
-		# Simply print to show it's working 
-		echo('Finished up on ' + repo + ' and it is ' + str(validRepo) + '\n')
+			# If STILL not valid, all aboard the failboat.
+			if not validRepo:
+				item.append('Not a valid repository.')
+				result.append(item)
+		else:
+			item.append('Hostname does not resolve.')
+			result.append(item)
+	return result
 
-	# All done
-	sys.exit(0)
+
+############
+### MAIN ###
+############
+
+if __name__ == '__main__':
+
+	# Time to build our list of repos with the info we need
+	repoFiles = findRepoFiles(repoFolder, exclusion)
+	repoList = findRepos(repoFolder, repoFiles)
+	repoNumber = len(repoList)
+	# Make sure we found at least 1 repo
+	if repoNumber < 1:
+		sys.stderr.write('Unable to find our repos! Something is wrong.\n')
+		sys.exit(1)
+
+	# Now that we have our repo list. Time to start testing things!
+	echo('Beginning scan of all ' + str(repoNumber) + ' repositories, get some coffee...')
+	# Find our failed repos
+	failedRepos = checkRepos(repoList)
+	# Done scanning repos
+	echo('done!\n')
+	# Check how many bad repos we found.
+	failedNumber = len(failedRepos)
+	# If we found nothing, all is well
+	if failedNumber == 0:
+		echo('No failed repos present! All is well on this iPhone.\n')
+		sys.exit(0)
+	else:
+		# Not needed for function, but dang it I love grammar.
+		if failedNumber > 1:
+			echo('\nWe have found ' + str(failedNumber) + ' bad repos.\n')
+			echo('Here are the following offending repos:\n')
+		else:
+			echo('\nWe have found ' + str(failedNumber) + ' bad repo.\n')
+			echo('Here is the offending repo:\n')
+
+		for item in failedRepos:
+			# Aliases are good.
+			filename = item[0]
+			repo = item[1]
+			hostname = repo.split('/')[2]
+			error = item[-1]
+			echo('\nHostname:\t' + hostname)
+			echo('\nFull Repo:\t' + repo)
+			echo('\nFilename:\t' + filename)
+			echo('\nRepo Error:\t' + error + '\n')
+		# Add yes/no to migrate to /retired/
+		sys.exit(0)
