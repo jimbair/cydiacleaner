@@ -25,8 +25,7 @@ import sys
 import urllib2
 
 # Varibles we need
-#repoFolder = '/etc/apt/sources.list.d/'
-repoFolder = 'repos/' # For testing reasons
+repoFolder = '/etc/apt/sources.list.d/'
 retiredFolder = repoFolder + 'retired/'
 mirrorFiles = [ 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2', 'Packages.gz', 'Packages' ]
 exclusion = [ 'cydia.list' ]
