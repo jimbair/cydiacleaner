@@ -126,4 +126,6 @@ if __name__ == '__main__':
 
 		# Simply print to show it's working 
 		echo('Finished up on ' + repo + ' and it is ' + str(validRepo) + '\n')
-		sys.exit(0)
+
+	# All done
+	sys.exit(0)
