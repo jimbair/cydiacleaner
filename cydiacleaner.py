@@ -194,34 +194,35 @@ if __name__ == '__main__':
 	if failedNumber == 0:
 		echo('No failed repos present! All is well on this iPhone.\n')
 		sys.exit(0)
+		
+	# If we're still here, we have broken repos.
+	# Not needed for function, but dang it I love grammar.
+	if failedNumber > 1:
+		echo('\nWe have found ' + str(failedNumber) + ' bad repos.\n')
+		echo('Here are the following offending repos:\n')
 	else:
-		# Not needed for function, but dang it I love grammar.
-		if failedNumber > 1:
-			echo('\nWe have found ' + str(failedNumber) + ' bad repos.\n')
-			echo('Here are the following offending repos:\n')
-		else:
-			echo('\nWe have found ' + str(failedNumber) + ' bad repo.\n')
-			echo('Here is the offending repo:\n')
+		echo('\nWe have found ' + str(failedNumber) + ' bad repo.\n')
+		echo('Here is the offending repo:\n')
 
-		for item in failedRepos:
-			# Aliases are good.
-			filename = item[0]
-			repo = item[1]
-			hostname = repo.split('/')[2]
-			error = item[-1]
-			echo('\nHostname:\t' + hostname)
-			echo('\nFull Repo:\t' + repo)
-			echo('\nFilename:\t' + filename)
-			echo('\nRepo Error:\t' + error + '\n')
+	for item in failedRepos:
+		# Aliases are good.
+		filename = item[0]
+		repo = item[1]
+		hostname = repo.split('/')[2]
+		error = item[-1]
+		echo('\nHostname:\t' + hostname)
+		echo('\nFull Repo:\t' + repo)
+		echo('\nFilename:\t' + filename)
+		echo('\nRepo Error:\t' + error + '\n')
 
-		# Retire our bad repos
-		echo('\n')
-		for item in failedRepos:
-			filename = item[0]
-			liveFile = repoFolder + filename
-			retiredFile = retiredFolder + filename
-			echo('Retiring ' + filename + '...')
-			shutil.move(liveFile, retiredFile)
-			echo('done.\n')
-		echo('All invalid repositories have been retired.\n')
-		sys.exit(0)
+	# Retire our bad repos
+	echo('\n')
+	for item in failedRepos:
+		filename = item[0]
+		liveFile = repoFolder + filename
+		retiredFile = retiredFolder + filename
+		echo('Retiring ' + filename + '...')
+		shutil.move(liveFile, retiredFile)
+		echo('done.\n')
+	echo('All invalid repositories have been retired.\n')
+	sys.exit(0)
