@@ -10,7 +10,7 @@ import urllib2
 
 # Varibles we need
 #repoFolder = '/etc/apt/sources.list.d/'
-repoFolder = 'repos/'
+repoFolder = 'repos/' # For testing reasons
 mirrorFiles = [ 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2', 'Packages.gz', 'Packages' ]
 exclusion='cydia.list'
 
@@ -51,6 +51,7 @@ if __name__ == '__main__':
 	# Find our files.
 	if os.path.isdir(repoFolder):
 		repoFiles = os.listdir(repoFolder)
+	# Make sure our folder is actually there.
 	else:
 		sys.stderr.write('Our repo folder ' + repoFolder + ' is missing.\n')
 		sys.exit(1)
@@ -58,51 +59,56 @@ if __name__ == '__main__':
 	# Remove cydia.list (it should be here)
 	if repoFiles.count(exclusion) > 0:
 		repoFiles.remove(exclusion)
+	# If our exclusion is missing, this isn't an iPhone w/ cydia. Exit.
 	else:
 		 sys.stderr.write(exclusion + ' is missing from ' + repoFolder)
 		 sys.stderr.write(' This repo is not valid or something has changed.\n')
 		 sys.exit(1)
 
-	# Remove invalid stuff
+	# We only want *.list
 	for file in repoFiles:
 		ourExt = os.path.splitext(file)[-1]
 		if ourExt != '.list':
 			repoFiles.remove(file)
 
-	# Time to build our lists
+	# Time to build our list of repos with the info we need
+	# filename, repo, dist
 	repoList = []
 	for file in repoFiles:
-		# Open the file and save it as a list
+		# Open the file and save it to a list
 		data = open(repoFolder + file, 'r')
 		result = data.readlines()
 		data.close()
-		# take each line and split it by spaces
+		# Split our string by spaces
 		for line in result:
 			ourValues = line.split()
 			# Make sure we don't have a blank line
 			if len(ourValues) > 0:
-				# Pull the path to the mirror and it's dist value
+				# Validate the line and get our info
 				if ourValues[0] == 'deb':
 					repoList.append([ file, ourValues[1], ourValues[2] ])
 
 	# Now that we have our repo list. Time to start testing things!
 	for item in repoList:
-
+		# Aliases are good.
 		filename = item[0]
 		repo = item[1]
 		dist = item[2]
 		hostname = repo.split('/')[2]
+		# All repos are false until proven otherwise
 		validRepo = False
 
+		# Make sure it resolves. Saves time instead of urllib2 doing this.
 		if isValidHostname(hostname):
-			# Check the root of the repo
+			# Check the repo itself for the files
 			for file in mirrorFiles:
 				link = repo + file
 				if isValidHTTP(link):
 					validRepo = True
-			# Now check the dist
+			# Now check the dist folder
 			if not validRepo:
 				for file in mirrorFiles:
+					# If ./ is given for dist, it's not used.
 					if dist == './':
 						break
 					link = repo + 'dists/' + dist + '/' + file
@@ -118,4 +124,6 @@ if __name__ == '__main__':
 						validRepo = True
 						break
 
+		# Simply print to show it's working 
 		echo('Finished up on ' + repo + ' and it is ' + str(validRepo) + '\n')
+		sys.exit(0)
