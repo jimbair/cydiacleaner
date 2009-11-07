@@ -4,9 +4,7 @@ This little Python program was written to help clean up the Cydia repos on a jai
 
 I decided to write this due to the "All Sources" package routinely giving me bunk repos that I would have to remove using either SSH or MobileTerminal. Cydia does not allow removal of repos that are installed by packages for whatever reason, and removing the "All Sources" app even states that removing the app does not remove the sources it installs.
 
-Currently, this is a script you upload and run directly on your phone (any directory is fine, so long as you're root). When it's run by itself, it checks your repos, then if any bad repos are found, it "retires" it from your repos.
-
-After it has 'retired' any faulty repos, it then re-checks any previously retired repos (but not the ones it has retired in that session) and, if found to be valid, are 'revived' and placed back into your repo list.
+To use, you upload cydiacleaner.py and run it directly on your phone (any directory is fine, so long as you're root). When it's run by itself, it checks your repos, then if any bad repos are found, it "retires" them from your Cydia repos. Then, it re-checks any previously retired repos (but not the oneswet just retired) and, if found to be valid, they are 'revived' and placed back into your Cydia repos.
 
 James Bair
 james.d.bair@gmail.com
