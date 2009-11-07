@@ -9,7 +9,7 @@ This little Python program is being written to help clean up the Cydia repos on 
 
 I decided to write this due to the "All Sources" package routinely giving me bunk repos that I would have to remove using either SSH or MobileTerminal. Cydia does not allow removal of repos that are installed by packages for whatever reason, and removing the "All Sources" app even states that removing the app does not remove the sources it installs.
 
-Currently, this is a script you would upload and run directly on your phone (any directory is fine, so long as you're root). I'm still working out the exact logic, but I'm thinking when it's run by itself, it checks your repos, then if any bad repos are found, it asks if you want to remove them. I am debating support for 'retiring' a repo, which you can then check on later using a different flat (search for good repos out of a /retired/ folder), with an ability to simply flush out the retired entries.
+Currently, this is a script you would upload and run directly on your phone (any directory is fine, so long as you're root). I'm still working out the exact logic, but I'm thinking when it's run by itself, it checks your repos, then if any bad repos are found, it asks if you want to remove them. I am debating support for 'retiring' a repo, which you can then check on later using a different flag (search for good repos out of a /retired/ folder and restore if any are found), with an ability to simply flush out the retired entries if you want to.
 
 It's still very much in flux, but I'll update this README as things move forward. As always, this is GPL'd for great justice.
 
