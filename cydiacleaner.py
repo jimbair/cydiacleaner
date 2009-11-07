@@ -275,7 +275,6 @@ if __name__ == '__main__':
 	for item in revivedRepos:
 		# Now, move our files back in
 		filename = item[0]
-		repo = item[1]
 		liveFile = repoFolder + filename
 		retiredFile = retiredFolder + filename
 		echo('Reviving ' + filename + '...')
