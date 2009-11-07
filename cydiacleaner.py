@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # A script to validate repos
+# v.1.0 - Teted and working
 # v.01 - Development 
 # Copyright (C) 2009  James Bair <james.d.bair@gmail.com>
 #
@@ -177,6 +178,11 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 ############
 
 if __name__ == '__main__':
+
+	# Must be root to run this script.
+	if os.getuid() != 0:
+		sys.stderr.write("This script must be run as root. Exiting.\n")
+		sys.exit(1)
 
 	# If this is our first time, create our retired folder
 	if not os.path.isdir(retiredFolder):
