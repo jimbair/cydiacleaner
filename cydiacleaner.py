@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # A script to validate repos
+# v.1.1 - Cleaned up some documentation
 # v.1.0 - Teted and working
-# v.01 - Development 
+# v.0.1 - Development 
 # Copyright (C) 2009  James Bair <james.d.bair@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
@@ -35,7 +36,8 @@ done = 'All finished! This iPhone is now squeaky clean! =)\n'
 
 def isValidHTTP(url=''):
 	"""
-	Function to validate a given URL using the P. Returns True/False
+	Function to validate a given URL using HTTP status codes.
+	Returns True (2xx) or False (anything else)
 	"""
 	try:
 		urllib2.urlopen(url)
@@ -67,7 +69,7 @@ def echo(message=''):
 def findRepoFiles(folder='', exclusions=None):
 	"""
 	Function to search a folder for repo files. If given any exclusions, 
-	will remove it from the list (exclusion should be a string).
+	will remove them from the list (exclusion should be a list).
 	"""
 	
 	# Find our files.
@@ -78,7 +80,7 @@ def findRepoFiles(folder='', exclusions=None):
 		sys.stderr.write('Our repo folder ' + folder + ' is missing.\n')
 		sys.exit(1)
 
-	# Remove cydia.list (it should be here)
+	# Remove any exclusions
 	if exclusions is not None:
 		for exclusion in exclusions:
 			if results.count(exclusion) > 0:
@@ -117,6 +119,8 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 	Function to verify if a list of repos are valid.
 	Expects a lists of lists, with each child list having:
 	[ Filename, Repo, Dist ]
+	Will return either good or bad repos, based on what is 
+	passed (returnBad=True or returnGood=True)
 	"""
 	result = []
 	for item in ourList:
@@ -130,7 +134,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 
 		# Make sure it resolves. Saves time instead of urllib2 doing this.
 		if isValidHostname(hostname):
-			# Check the repo itself for the files
+			# Check the base repo for our files
 			for file in mirrorFiles:
 				link = repo + file
 				if isValidHTTP(link):
