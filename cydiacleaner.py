@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # A script to validate repos
-# v.1.11 - Added User-Agent to isValidHTTP
+# v.1.11 - Reamed isValidHTTP to isValidURL
+#        - Added User-Agent to isValidURL
 # v.1.1  - Cleaned up some documentation
 # v.1.0  - Teted and working
 # v.0.1  - Development 
@@ -38,10 +39,10 @@ exclusion = [ 'cydia.list' ]
 failedFiles = None
 done = 'All finished! This iPhone is now squeaky clean! =)\n'
 
-def isValidHTTP(url=''):
+def isValidURL(url=''):
 	"""
-	Function to validate a given URL using HTTP status codes.
-	Returns True (2xx) or False (anything else)
+	Function to check if a given HTTP/FTP URL is valid.
+	Returns True/False.
 	"""
 	req = urllib2.Request(url=url, headers={'User-Agent': userAgent})
 	try:
@@ -142,7 +143,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			# Check the base repo for our files
 			for file in mirrorFiles:
 				link = repo + file
-				if isValidHTTP(link):
+				if isValidURL(link):
 					validRepo = True
 					if returnGood:
 						result.append(item)
@@ -154,7 +155,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 					if dist == './':
 						break
 					link = repo + 'dists/' + dist + '/' + file
-					if isValidHTTP(link):
+					if isValidURL(link):
 						validRepo = True
 						if returnGood:
 							result.append(item)
@@ -164,7 +165,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			if not validRepo:
 				for file in mirrorFiles:
 					link = 'http://' + hostname + '/' + file
-					if isValidHTTP(link):
+					if isValidURL(link):
 						validRepo = True
 						if returnGood:
 							result.append(item)
