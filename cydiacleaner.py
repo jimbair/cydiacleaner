@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # A script to validate repos
-# v.1.1 - Cleaned up some documentation
-# v.1.0 - Teted and working
-# v.0.1 - Development 
+# v.1.11 - Added User-Agent to isValidHTTP
+# v.1.1  - Cleaned up some documentation
+# v.1.0  - Teted and working
+# v.0.1  - Development 
 # Copyright (C) 2009  James Bair <james.d.bair@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
@@ -27,6 +28,9 @@ import sys
 import urllib2
 
 # Varibles we need
+script = os.path.basename(sys.argv[0])
+rev = '1.11'
+userAgent = script + ' ' + rev
 repoFolder = '/etc/apt/sources.list.d/'
 retiredFolder = repoFolder + 'retired/'
 mirrorFiles = [ 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2', 'Packages.gz', 'Packages' ]
@@ -39,8 +43,9 @@ def isValidHTTP(url=''):
 	Function to validate a given URL using HTTP status codes.
 	Returns True (2xx) or False (anything else)
 	"""
+	req = urllib2.Request(url=url, headers={'User-Agent': userAgent})
 	try:
-		urllib2.urlopen(url)
+		urllib2.urlopen(req)
 	except:
 		return False
 
