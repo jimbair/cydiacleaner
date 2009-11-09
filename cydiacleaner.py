@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # A script to validate repos
-# v.1.11 - Reamed isValidHTTP to isValidURL
+# v.1.11 - Renamed isValidHTTP to isValidURL
 #        - Added User-Agent to isValidURL
 # v.1.1  - Cleaned up some documentation
 # v.1.0  - Teted and working
