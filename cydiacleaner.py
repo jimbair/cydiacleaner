@@ -54,7 +54,7 @@ def isValidURL(url=''):
 
 def isValidHostname(host=''):
 	"""
-	Function to validate of a given hostname is valid. Used 
+	Function to validate if a given hostname is valid. Used 
 	to find bad hostnames that timeout. Returns True/False
 	"""
 	try:
