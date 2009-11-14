@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # A script to validate repos
-# v.1.11 - Renamed isValidHTTP to isValidURL
-#        - Added User-Agent to isValidURL
-# v.1.1  - Cleaned up some documentation
-# v.1.0  - Teted and working
-# v.0.1  - Development 
+# v1.12 - Fixed some verbage
+#       - switched exclusion check from .count to 'if a in b'
+# v1.11 - Renamed isValidHTTP to isValidURL
+#       - Added User-Agent to isValidURL
+# v1.1  - Cleaned up some documentation
+# v1.0  - Teted and working
+# v0.1  - Development 
 # Copyright (C) 2009  James Bair <james.d.bair@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
@@ -30,7 +32,7 @@ import urllib2
 
 # Varibles we need
 script = os.path.basename(sys.argv[0])
-rev = '1.11'
+rev = '1.12'
 userAgent = script + ' ' + rev
 repoFolder = '/etc/apt/sources.list.d/'
 retiredFolder = repoFolder + 'retired/'
@@ -89,7 +91,7 @@ def findRepoFiles(folder='', exclusions=None):
 	# Remove any exclusions
 	if exclusions is not None:
 		for exclusion in exclusions:
-			if results.count(exclusion) > 0:
+			if exclusion in results:
 				results.remove(exclusion)
 
 	# We only want *.list
