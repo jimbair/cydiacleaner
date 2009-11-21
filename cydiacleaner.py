@@ -208,7 +208,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRe
 
 def main():
 	"""
-	The main function for Cydia Claner.
+	The main function for Cydia Cleaner.
 	"""
 	# Variables we need
 	done = "All finished! This iPhone is now squeaky clean! =)\n"
