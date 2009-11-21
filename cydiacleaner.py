@@ -1,5 +1,13 @@
 #!/usr/bin/python
 # A script to validate repos
+# v1.20 - Changed mirrorFiles to a tuple
+#       - Moved all variables into functions to be more 'correct'
+#       - set isValidURL's userAgent as a passable string object
+#       - Added input check on all functions. If no input is given, 
+#         all functions now return either None or False.
+#       - Added a return of True to echo()
+#       - changed a lot of concatenation of strings into the 
+#       - % (object,) method
 # v1.12 - Fixed some verbage
 #       - switched exclusion check from .count to 'if a in b'
 # v1.11 - Renamed isValidHTTP to isValidURL
@@ -23,29 +31,20 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# Modules we need
 import os
 import shutil
 import socket
 import sys
 import urllib2
 
-# Varibles we need
-script = os.path.basename(sys.argv[0])
-rev = '1.12'
-userAgent = script + ' ' + rev
-repoFolder = '/etc/apt/sources.list.d/'
-retiredFolder = repoFolder + 'retired/'
-mirrorFiles = [ 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2', 'Packages.gz', 'Packages' ]
-exclusion = [ 'cydia.list' ]
-failedFiles = None
-done = 'All finished! This iPhone is now squeaky clean! =)\n'
-
-def isValidURL(url=''):
+def isValidURL(url='', userAgent='isValidURL'):
 	"""
 	Function to check if a given HTTP/FTP URL is valid.
 	Returns True/False.
 	"""
+	if url == '':
+		return False
+	
 	req = urllib2.Request(url=url, headers={'User-Agent': userAgent})
 	try:
 		urllib2.urlopen(req)
@@ -59,6 +58,9 @@ def isValidHostname(host=''):
 	Function to validate if a given hostname is valid. Used 
 	to find bad hostnames that timeout. Returns True/False
 	"""
+	if host == '':
+		return False
+	
 	try:
 		socket.gethostbyname(host)
 	except:
@@ -71,21 +73,27 @@ def echo(message=''):
 	Function to emulate echo -en type functionality since
 	print acts weird at times and py3k changes print as well.
 	"""
+	if message == '':
+		return False
+
 	sys.stdout.write(message)
 	sys.stdout.flush()
+	return True
 
 def findRepoFiles(folder='', exclusions=None):
 	"""
 	Function to search a folder for repo files. If given any exclusions, 
 	will remove them from the list (exclusion should be a list).
 	"""
-	
+	if folder == '':
+		return None
+
 	# Find our files.
 	if os.path.isdir(folder):
 		results = os.listdir(folder)
 	# Make sure our folder is actually there.
 	else:
-		sys.stderr.write('Our repo folder ' + folder + ' is missing.\n')
+		sys.stderr.write("Our repo folder %s is missing.\n" % (folder,))
 		sys.exit(1)
 
 	# Remove any exclusions
@@ -107,6 +115,9 @@ def findRepos(folder='', files=[]):
 	Function to pull the apt repos out of a list of files from a given folder.
 	"""
 	results = []
+	if folder == '':
+		return None
+
 	for file in files:
 		# Open the file and save it to a list
 		data = open(folder + file, 'r')
@@ -122,7 +133,7 @@ def findRepos(folder='', files=[]):
 					results.append([ file, ourValues[1], ourValues[2] ])
 	return results
 
-def checkRepos(ourList=[], returnBad=False, returnGood=False):
+def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRepos'):
 	"""
 	Function to verify if a list of repos are valid.
 	Expects a lists of lists, with each child list having:
@@ -130,7 +141,13 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 	Will return either good or bad repos, based on what is 
 	passed (returnBad=True or returnGood=True)
 	"""
+	if ourList == [] or returnBad is False and returnGood is False:
+		return None
+			
+	mirrorFiles = ( 'Release.gpg', 'en.bz2', 'Release', 'Packages.bz2',
+			'Packages.gz', 'Packages' )
 	result = []
+	
 	for item in ourList:
 		# Aliases are good.
 		filename = item[0]
@@ -145,7 +162,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			# Check the base repo for our files
 			for file in mirrorFiles:
 				link = repo + file
-				if isValidURL(link):
+				if isValidURL(link, userAgent):
 					validRepo = True
 					if returnGood:
 						result.append(item)
@@ -154,10 +171,10 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			if not validRepo:
 				for file in mirrorFiles:
 					# If ./ is given for dist, it's not used.
-					if dist == './':
+					if dist == "./":
 						break
-					link = repo + 'dists/' + dist + '/' + file
-					if isValidURL(link):
+					link = "%sdists/%s/%s" % (repo, dist, file)
+					if isValidURL(link, userAgent):
 						validRepo = True
 						if returnGood:
 							result.append(item)
@@ -166,8 +183,8 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			# This checks the root of the hostname for the files.
 			if not validRepo:
 				for file in mirrorFiles:
-					link = 'http://' + hostname + '/' + file
-					if isValidURL(link):
+					link = "http://%s/%s" % (hostname, file)
+					if isValidURL(link, userAgent):
 						validRepo = True
 						if returnGood:
 							result.append(item)
@@ -176,7 +193,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 			# If STILL not valid, all aboard the failboat.
 			if not validRepo:
 				if returnBad:
-					item.append('Not a valid repository.')
+					item.append("Not a valid repository.")
 					result.append(item)
 		else:
 			if returnBad:
@@ -189,11 +206,27 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False):
 ### MAIN ###
 ############
 
-if __name__ == '__main__':
-
+def main():
+	"""
+	The main function for Cydia Claner.
+	"""
+	# Variables we need
+	done = "All finished! This iPhone is now squeaky clean! =)\n"
+	exclusion = [ 'cydia.list' ]
+	repoFolder = "/etc/apt/sources.list.d/"
+	retiredFolder = repoFolder + "retired/"
+	rev = "1.20"
+	script = os.path.basename(sys.argv[0])
+	userAgent = script + " " + rev
+	
 	# Must be root to run this script.
 	if os.getuid() != 0:
-		sys.stderr.write("This script must be run as root. Exiting.\n")
+		sys.stderr.write("This program must be run as root.\n")
+		sys.exit(1)
+
+	# Ensure our repo folder exists
+	if not os.path.isdir(repoFolder):
+		sys.stderr.write("Our repo folder %s is missing.\n" % (repoFolder,))
 		sys.exit(1)
 
 	# If this is our first time, create our retired folder
@@ -208,30 +241,32 @@ if __name__ == '__main__':
 	repoNumber = len(repoList)
 	# Make sure we found at least 1 repo
 	if repoNumber < 1:
-		sys.stderr.write('Unable to find our repos! Something is wrong.\n')
+		sys.stderr.write("Unable to find our repos! Something is wrong.\n")
 		sys.exit(1)
 
 	# Now that we have our repo list. Time to start testing things!
-	echo('Beginning scan of all ' + str(repoNumber) + ' repositories, get some coffee...')
+	echo("Beginning scan of all %d repositories, get some coffee..." % (repoNumber,))
 	# Find our failed repos
-	failedRepos = checkRepos(repoList, returnBad=True)
+	failedRepos = checkRepos(repoList, returnBad=True, userAgent=userAgent)
 	# Done scanning repos
-	echo('done!\n')
+	echo("done!\n")
 	# Check how many bad repos we found.
 	failedNumber = len(failedRepos)
 	# If we found nothing, all is well
 	if failedNumber == 0:
-		echo('No repos failed! All is well.\n\n')
+		echo("No repos failed! All is well.\n\n")
+		failedFiles = None
 		
 	else:
 		# If we're still here, we have broken repos.
 		# Not needed for function, but dang it I love grammar.
+		failedFiles = []
 		if failedNumber == 1:
-			echo('\nWe have found 1 bad repo.\n')
-			echo('Here is the offending repo:\n')
+			echo("\nWe have found 1 bad repo.\n")
+			echo("Here is the offending repo:\n")
 		else:
-			echo('\nWe have found ' + str(failedNumber) + ' bad repos.\n')
-			echo('Here are the following offending repos:\n')
+			echo("\nWe have found %d bad repos.\n" % (failedNumber,))
+			echo("Here are the following offending repos:\n")
 	
 		for item in failedRepos:
 			# Aliases are good.
@@ -239,66 +274,69 @@ if __name__ == '__main__':
 			repo = item[1]
 			hostname = repo.split('/')[2]
 			error = item[-1]
-			echo('\nHostname:\t' + hostname)
-			echo('\nFull Repo:\t' + repo)
-			echo('\nFilename:\t' + filename)
-			echo('\nRepo Error:\t' + error + '\n')
+			echo("\nHostname:\t" + hostname)
+			echo("\nFull Repo:\t" + repo)
+			echo("\nFilename:\t" + filename)
+			echo("\nRepo Error:\t" + error + "\n")
 	
 		# Retire our bad repos
-		echo('\n')
+		echo("\n")
 		# Make note of what's failed
-		failedFiles = []
 		for item in failedRepos:
 			filename = item[0]
 			failedFiles.append(filename)
 			liveFile = repoFolder + filename
 			retiredFile = retiredFolder + filename
-			echo('Retiring ' + filename + '...')
+			echo("Retiring %s..." % (filename,))
 			shutil.move(liveFile, retiredFile)
-			echo('done.\n')
-		echo('All invalid repositories have been retired.\n')
+			echo("done.\n")
+		echo("All invalid repositories have been retired.\n")
 
 	# Now, let's scan our retired folder.
-	echo('Now finding previous retired repos...')
+	echo("Now finding previous retired repos...")
 	retiredFiles = findRepoFiles(retiredFolder, failedFiles)
 	retiredList = findRepos(retiredFolder, retiredFiles)
 	retiredNum = len(retiredList)
-	echo('done.\n')
+	echo("done.\n")
 	# If we found nothing new, then nothing to scan over.
 	if retiredNum < 1:
-		echo('No new retired repo files to validate.\n\n' + done)
+		echo("No new retired repo files to validate.\n\n" + done)
 		sys.exit(0)
 
 	# If we're still here, scan what we found
-	echo("Beginning scan of all " + str(retiredNum) + " previously retired repositories, get s'mo coffee...")
-	revivedRepos = checkRepos(retiredList, returnGood=True)
-	echo('done!\n')
+	echo("Beginning scan of all %d previously retired repositories, get s'mo coffee..." % (retiredNum,))
+	revivedRepos = checkRepos(retiredList, returnGood=True, userAgent=userAgent)
+	echo("done!\n")
 
 	# See if we found anything back
 	revivedNumber = len(revivedRepos)	
 	if revivedNumber < 1:
-		echo('No previously retired repos are back online yet.\n\n' + done)
+		echo("No previously retired repos are back online yet.\n\n" + done)
 		sys.exit(0)
 	if revivedNumber == 1:
-		echo('Found 1 repo that is back from the dead!\n')
+		echo("Found 1 repo that is back from the dead!\n")
 	else:
-		echo('Found ' + str(revivedNumber) + ' repos that are back from the dead!\n')
+		echo("Found %d repos that are back from the dead!\n" % (revivedNumber,))
 
 	for item in revivedRepos:
 		# Now, move our files back in
 		filename = item[0]
 		liveFile = repoFolder + filename
 		retiredFile = retiredFolder + filename
-		echo('Reviving ' + filename + '...')
+		echo("Reviving %s..." % (filename,))
 		shutil.move(retiredFile, liveFile)
-		echo('done.\n')
+		echo("done.\n")
 	
 	# All done
 	if revivedNumber == 1:
-		echo('Successfully revived 1 repository.\n\n')
+		echo("Successfully revived 1 repository.\n\n")
 	else:
-		echo('Successfully revived ' + str(revivedNumber) + ' repositories.\n\n')
+		echo("Successfully revived %d repositories.\n\n" % (revivedNumber,))
 
 	# All done
 	echo(done)
 	sys.exit(0)
+
+# And run main
+if __name__ == "__main__":
+		main()
