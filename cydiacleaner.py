@@ -1,7 +1,9 @@
 #!/usr/bin/python
-# Used to validate package-installed apt repo files on Jailbroken
-# iPhones. Only requires Python to run.
-#
+"""
+Script used to validate package-installed apt repo files on Jailbroken
+iPhones. Only requires Python to run. Tested and verified on both iOS 
+3.x and 4.x.
+"""
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
@@ -129,10 +131,10 @@ def findRepoFiles(folder='', exclusions=None):
                 results.remove(exclusion)
 
     # We only want *.list
-    for file in results:
-        ourExt = os.path.splitext(file)[-1]
+    for result in results:
+        ourExt = os.path.splitext(result)[-1]
         if ourExt != '.list':
-            results.remove(file)
+            results.remove(result)
 
     return results
 
@@ -144,9 +146,9 @@ def findRepos(folder='', files=[]):
     if folder == '':
         return None
 
-    for file in files:
+    for ourFile in files:
         # Open the file and save it to a list
-        data = open(folder + file, 'r')
+        data = open(folder + ourFile, 'r')
         result = data.readlines()
         data.close()
         # Split our string by spaces
@@ -156,10 +158,11 @@ def findRepos(folder='', files=[]):
             if len(ourValues) > 0:
                 # Validate the line and get our info
                 if ourValues[0] == 'deb':
-                    results.append([ file, ourValues[1], ourValues[2] ])
+                    results.append([ ourFile, ourValues[1], ourValues[2] ])
     return results
 
-def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRepos'):
+def checkRepos(ourList=[], returnBad=False, returnGood=False,
+               userAgent='checkRepos'):
     """
     Function to verify if a list of repos are valid.
     Expects a lists of lists, with each child list having:
@@ -179,7 +182,7 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRe
 
     for item in ourList:
         # Aliases are good.
-        filename = item[0]
+        #filename = item[0] - We don't actually use this. Just for reference.
         repo = item[1]
         dist = item[2]
         hostname = repo.split('/')[2]
@@ -197,8 +200,8 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRe
                     echo("\tyes\n")
 
                 # Check the base repo for our files
-                for file in mirrorFiles:
-                    link = repo + file
+                for ourFile in mirrorFiles:
+                    link = repo + ourFile
                     if debug:
                         echo("Checking if %s is there..." % (link,))
                     if isValidURL(link, userAgent):
@@ -214,11 +217,11 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRe
 
                 # Now check the dist folder
                 if not validRepo:
-                    for file in mirrorFiles:
+                    for ourFile in mirrorFiles:
                         # If ./ is given for dist, it's not used.
                         if dist == "./":
                             break
-                        link = "%sdists/%s/%s" % (repo, dist, file)
+                        link = "%sdists/%s/%s" % (repo, dist, ourFile)
                         if debug:
                             echo("Checking if %s is there..." % (link,))
                         if isValidURL(link, userAgent):
@@ -235,8 +238,8 @@ def checkRepos(ourList=[], returnBad=False, returnGood=False, userAgent='checkRe
                 # Last chance, done for iphonehe since their repo is weird.
                 # This checks the root of the hostname for the files.
                 if not validRepo:
-                    for file in mirrorFiles:
-                        link = "http://%s/%s" % (hostname, file)
+                    for ourFile in mirrorFiles:
+                        link = "http://%s/%s" % (hostname, ourFile)
                         if debug:
                             echo("Checking if %s is there..." % (link,))
                         if isValidURL(link, userAgent):
@@ -286,7 +289,7 @@ def main():
     ourSocketTimeout = 3
     repoFolder = "/etc/apt/sources.list.d/"
     retiredFolder = repoFolder + "retired/"
-    rev = "1.30"
+    rev = "1.31"
     script = os.path.basename(sys.argv[0])
     userAgent = script + " " + rev
     
@@ -330,7 +333,8 @@ def main():
     socket.setdefaulttimeout(ourSocketTimeout)
 
     # Now that we have our repo list. Time to start testing things!
-    echo("Beginning scan of all %d repositories, get some coffee..." % (repoNumber,))
+    echo("Beginning scan of all %d repositories, "
+    "get some coffee..." % (repoNumber,))
     # Find our failed repos
     failedRepos = checkRepos(repoList, returnBad=True, userAgent=userAgent)
     # Done scanning repos
@@ -389,7 +393,8 @@ def main():
         sys.exit(0)
 
     # If we're still here, scan what we found
-    echo("Beginning scan of all %d previously retired repositories, get s'mo coffee..." % (retiredNum,))
+    echo("Beginning scan of all %d previously retired repositories, "
+    "get s'mo coffee..." % (retiredNum,))
     revivedRepos = checkRepos(retiredList, returnGood=True, userAgent=userAgent)
     echo("done!\n")
 
@@ -424,4 +429,4 @@ def main():
 
 # And run main
 if __name__ == "__main__":
-        main()
+    main()
