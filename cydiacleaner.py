@@ -1,26 +1,6 @@
 #!/usr/bin/python
-# A script to validate repos
-# v1.30 - Changed tabs to spaces since GvR says so
-#       - Added lots of debug code
-#       - Added serviceOnline()
-#         Now checking if FTP/HTTP service is online before we 
-#         start attempting to pull down files.
-# v1.20 - Changed mirrorFiles to a tuple
-#       - Moved all variables into functions to be more 'correct'
-#       - set isValidURL's userAgent as a passable string object
-#       - Added input check on all functions. If no input is given, 
-#         all functions now return either None or False.
-#       - Added a return of True to echo()
-#       - changed a lot of concatenation of strings into the 
-#       - % (object,) method
-# v1.12 - Fixed some verbage
-#       - switched exclusion check from .count to 'if a in b'
-# v1.11 - Renamed isValidHTTP to isValidURL
-#       - Added User-Agent to isValidURL
-# v1.1  - Cleaned up some documentation
-# v1.0  - Teted and working
-# v0.1  - Development 
-# Copyright (C) 2009  James Bair <james.d.bair@gmail.com>
+# Used to validate package-installed apt repo files on Jailbroken
+# iPhones. Only requires Python to run.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -323,6 +303,11 @@ def main():
     # Ensure our repo folder exists
     if not os.path.isdir(repoFolder):
         sys.stderr.write("Our repo folder %s is missing.\n" % (repoFolder,))
+        sys.exit(1)
+
+    # Ensure we have network connectivity
+    if not serviceOnline('http://www.google.com/'):
+        sys.stderr.write("We have no network connectivity! Exiting.")
         sys.exit(1)
 
     # If this is our first time, create our retired folder
