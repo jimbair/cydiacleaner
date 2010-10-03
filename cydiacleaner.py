@@ -125,7 +125,7 @@ def findRepoFiles(folder='', exclusions=None):
         sys.exit(1)
 
     # Remove any exclusions
-    if exclusions is not None:
+    if exclusions:
         for exclusion in exclusions:
             if exclusion in results:
                 results.remove(exclusion)
@@ -289,7 +289,7 @@ def main():
     ourSocketTimeout = 3
     repoFolder = "/etc/apt/sources.list.d/"
     retiredFolder = repoFolder + "retired/"
-    rev = "1.31"
+    rev = "1.32"
     script = os.path.basename(sys.argv[0])
     userAgent = script + " " + rev
     
